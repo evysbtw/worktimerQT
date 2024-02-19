@@ -22,7 +22,7 @@ public:
     void createUserTableIfNotExists(QString email);
     int calculateDuration(QString email, QTime startTime);
     int calculateBalance(QString email, int duration, int requiredTime, QDate date);
-    int calculateTotalBalance(QString email, QTime startTime, int balance, QDate date, int duration);
+    int calculateTotalBalance(QString email, QTime startTime, int balance, QDate date, int duration, QString status);
 //    void setDuration(int duration, QString email, QString year, QTime startTime);
 //    void setBalance(int balance, QString email, QString year, QTime startTime);
 //    void setTotalBalance(int totalBalance, QString email, QString year, QTime startTime);

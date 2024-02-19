@@ -44,6 +44,7 @@ void LoginPage::logging_in() {
                 loginSettings.setValue("password", password);
 
                 emit loginSubmitted();
+                db.close();
                 this->close();
             } else {
                 qDebug() << "Login failed: Incorrect password";

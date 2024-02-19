@@ -24,11 +24,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->start_button, SIGNAL(clicked()), this, SLOT(start_session()));
     connect(ui->end_button, SIGNAL(clicked()), this, SLOT(end_session()));
     connect(ui->pause_button, SIGNAL(clicked()), this, SLOT(paused_session()));
-    connect(ui->unpause_button, SIGNAL(clicked()), this, SLOT(unpaused_session()));
+    connect(ui->unpause_button, &QPushButton::clicked, this, [this]() {unpaused_session("Default"); });
     connect(ui->logOutButton, SIGNAL(clicked()), this, SLOT(logOut()));
     connect(ui->info_button, SIGNAL(clicked()), this, SLOT(show_infopage()));
 
     connect(loginPage, &LoginPage::loginSubmitted, this, &MainWindow::loginSuccesful);
+    connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::aboutToQuitHandler);
 
     ui->start_button->setEnabled(true);
     ui->end_button->setEnabled(false);
@@ -122,7 +123,7 @@ void MainWindow::end_session() {
 
     int duration = dbTools.calculateDuration(email, id);
     int balance = dbTools.calculateBalance(email, duration, requiredTime, qDate);
-    int totalBalance = dbTools.calculateTotalBalance(email, id, balance, qDate, duration);
+    int totalBalance = dbTools.calculateTotalBalance(email, id, balance, qDate, duration, "Working");
 
     dbTools.setDurationBalanceTotal(duration, balance, totalBalance, email, id);
 
@@ -140,11 +141,11 @@ void MainWindow::paused_session() {
     QSettings loginSettings("Worktimer");
     QString email = loginSettings.value("email").toString();
     dbTools.setStop(qDate, qTime, email, this->startedTime);
-    dbTools.setStart(qDate, qTime, email, "Pause", 0);
+
     ui->status_label->setText("Status: Paused");
     int duration = dbTools.calculateDuration(email, this->startedTime);
     int balance = dbTools.calculateBalance(email, duration, requiredTime, qDate);
-    int totalBalance = dbTools.calculateTotalBalance(email, this->startedTime, balance, qDate, duration);
+    int totalBalance = dbTools.calculateTotalBalance(email, this->startedTime, balance, qDate, duration, "Working");
 
     dbTools.setDurationBalanceTotal(duration, balance, totalBalance, email, this->startedTime);
 
@@ -152,9 +153,11 @@ void MainWindow::paused_session() {
     ui->end_button->setEnabled(false);
     ui->pause_button->setEnabled(false);
     ui->unpause_button->setEnabled(true);
+
+    dbTools.setStart(qDate, qTime, email, "Pause", 0);
 }
 
-void MainWindow::unpaused_session() {
+void MainWindow::unpaused_session(const QString& mode) {
     std::string date = get_time();
     this->working_status = "Active";
 
@@ -166,14 +169,14 @@ void MainWindow::unpaused_session() {
     QString email = loginSettings.value("email").toString();
 
     dbTools.setStop(qDate, qTime, email, this->pausedTime);
-    dbTools.setStart(qDate, qTime, email, "Working", requiredTime);
+
     this->startedTime = qTime;
 
     ui->status_label->setText("Status: Active");
 
     int duration = dbTools.calculateDuration(email, this->pausedTime);
     int balance = 0;
-    int totalBalance = dbTools.calculateTotalBalance(email, this->pausedTime, balance, qDate, duration);
+    int totalBalance = dbTools.calculateTotalBalance(email, this->pausedTime, balance, qDate, duration, "Pause");
 
     dbTools.setDurationBalanceTotal(duration, balance, totalBalance, email, this->pausedTime);
 
@@ -181,6 +184,10 @@ void MainWindow::unpaused_session() {
     ui->end_button->setEnabled(true);
     ui->pause_button->setEnabled(true);
     ui->unpause_button->setEnabled(false);
+
+    if (mode == "Default") {
+        dbTools.setStart(qDate, qTime, email, "Working", requiredTime);
+    }
 }
 
 void MainWindow::show_infopage() {
@@ -279,6 +286,13 @@ void MainWindow::logOut() {
     loginSettings.clear();
     loginCompleted = false;
 
+    if (working_status == "Active") {
+        end_session();
+    }
+    if (working_status == "Paused") {
+        unpaused_session("QuitHandlingMode");
+    }
+
     QString email = loginSettings.value("email").toString();
     if (email.isEmpty() && !loginCompleted) {
         qDebug() << "Hiding Main window...";
@@ -346,7 +360,6 @@ int DatabaseTools::calculateBalance(QString email, int duration, int requiredTim
                 int i = 0;
                 while (query.next() && i < 2) {
                     id = query.value(0).toInt();
-                    qDebug() << "Id: " << id;
                     i++;
                 }
                 QString balanceQuery = QString("SELECT balance FROM `%1` WHERE id = :id").arg(sanitizedEmail);
@@ -375,7 +388,7 @@ int DatabaseTools::calculateBalance(QString email, int duration, int requiredTim
     return 0;
 }
 
-int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int balance, QDate date, int duration) {
+int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int balance, QDate date, int duration, QString status) {
     QString sanitizedEmail = sanitizeString(email);
 
     QSqlDatabase db = DatabaseTools::database();
@@ -383,10 +396,10 @@ int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int bal
     if (db.open()) {
         qDebug() << "CalculateTotalBalance: Connected to the database";
 
-        QString idQuery = QString("SELECT id FROM `%1` WHERE date = :date AND status = :status ORDER BY id DESC").arg(sanitizedEmail);
+        QString idQuery = QString("SELECT id FROM `%1` WHERE date = :date ORDER BY id DESC").arg(sanitizedEmail);
         query.prepare(idQuery);
         query.bindValue(":date", date);
-        query.bindValue(":status", "Working");
+
 
         if (query.exec()) {
             if (query.size() > 1) {
@@ -394,7 +407,6 @@ int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int bal
                 int i = 0;
                 while (query.next() && i < 2) {
                     id = query.value(0).toInt();
-                    qDebug() << "Id: " << id;
                     i++;
                 }
                 QString balanceQuery = QString("SELECT total_balance FROM `%1` WHERE id = :id").arg(sanitizedEmail);
@@ -404,8 +416,15 @@ int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int bal
                 if (query.exec()) {
                     if (query.next()) {
                         int previousTotalBalance = query.value(0).toInt();
-                        int actualTotalBalance = previousTotalBalance + duration;
-                        return actualTotalBalance;
+                        if (status == "Working") {
+                            int actualTotalBalance = previousTotalBalance + duration;
+                            return actualTotalBalance;
+                        }
+                        else {
+                            qDebug() << "Returning previous total_balance";
+                            return previousTotalBalance;
+                        }
+
                     }
                 }
             }
@@ -434,9 +453,6 @@ int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int bal
             }
         }
     }
-
-
-
 }
 
 void DatabaseTools::setDurationBalanceTotal(int duration, int balance, int totalBalance, QString email, QTime startTime) {
@@ -473,6 +489,17 @@ void MainWindow::showTime(){
     ui->time_label->setText(text_time);
 }
 
+void MainWindow::aboutToQuitHandler() {
+    if (working_status == "Active") {
+        end_session();
+    }
+    if (working_status == "Paused") {
+        unpaused_session("QuitHandlingMode");
+    }
+
+    QSqlDatabase db = DatabaseTools::database();
+    db.close();
+}
 
 
 

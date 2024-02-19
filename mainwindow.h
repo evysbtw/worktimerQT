@@ -19,7 +19,7 @@ public:
     ~MainWindow();
 private:
     Ui::MainWindow *ui;
-    std::string working_status;
+    QString working_status;
     DatabaseTools dbTools;
     LoginPage *loginPage;
     bool loginCompleted;
@@ -32,7 +32,8 @@ private slots:
     void start_session();
     void end_session();
     void paused_session();
-    void unpaused_session();
+    void unpaused_session(const QString& mode);
+
     void show_infopage();
     std::string get_time();
 //    QString getYear(QDate fullDate);
@@ -44,6 +45,7 @@ public slots:
     void loginSuccesful();
 //    void backToMainWindow();
     void showTime();
+    void aboutToQuitHandler();
 
 };
 #endif // MAINWINDOW_H
