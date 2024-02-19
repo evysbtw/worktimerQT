@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>481</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="time_label">
+       <property name="font">
+        <font>
+         <family>Agency FB</family>
+         <pointsize>36</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(193, 193, 193);
+border-radius: 10px;</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>130</y>
+      <width>481</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QWidget" name="gridLayoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>481</width>
+          <height>421</height>
+         </rect>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="pushButton">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>160</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border-radius: 10px;
+border: 2px solid gray;
+background-color: rgb(255, 255, 255);</string>
+           </property>
+           <property name="text">
+            <string>PushButton</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="pushButton_3">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>160</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border-radius: 10px;
+border: 2px solid gray;
+background-color: rgb(255, 255, 255);</string>
+           </property>
+           <property name="text">
+            <string>PushButton</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="info_button">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>160</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border-radius: 10px;
+background-image: url(:/icons/journalicon.jpg);
+border: 2px solid gray;</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="logOutButton">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>160</height>
+            </size>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border-radius: 10px;
+border: 2px solid gray;
+background-image: url(:/icons/logouticon.jpg);
+
+</string>
+           </property>
+           <property name="locale">
+            <locale language="Russian" country="Ukraine"/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="autoRepeat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>130</y>
+      <width>160</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QWidget" name="gridLayoutWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>-1</y>
+          <width>160</width>
+          <height>421</height>
+         </rect>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="start_button">
+           <property name="maximumSize">
+            <size>
+             <width>160</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+	border-radius: 10px;
+	background-image: url(:/icons/starticon.jpg);
+	border: 2px solid gray;
+}
+
+QPushButton:disabled {
+    background-color: #A9A9A9; 
+    border: 1px solid #A9A9A9; 
+}
+
+QPushButton:hover {
+    background-color: #45a049; 
+    border: 1px solid #45a049; 
+}</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="end_button">
+           <property name="maximumSize">
+            <size>
+             <width>160</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+	border-radius: 10px;
+	background-image: url(:/icons/finishicon.jpg);
+	border: 2px solid gray;
+}
+
+QPushButton:disabled {
+    background-color: #A9A9A9; 
+    border: 1px solid #A9A9A9; 
+}
+
+QPushButton:hover {
+    background-color: #45a049; 
+    border: 1px solid #45a049; 
+}
+
+</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QPushButton" name="pause_button">
+           <property name="maximumSize">
+            <size>
+             <width>160</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+	border-radius: 10px;
+	background-image: url(:/icons/pauseicon.jpg);
+	border: 2px solid gray;
+}
+
+QPushButton:disabled {
+    background-color: #A9A9A9; 
+    border: 1px solid #A9A9A9; 
+}
+
+QPushButton:hover {
+    background-color: #45a049; 
+    border: 1px solid #45a049; 
+}</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QPushButton" name="unpause_button">
+           <property name="maximumSize">
+            <size>
+             <width>160</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+	border-radius: 10px;
+	background-image: url(:/icons/unpauseicon.jpg);
+	border: 2px solid gray;
+}
+
+QPushButton:disabled {
+    background-color: #A9A9A9; 
+    border: 1px solid #A9A9A9; 
+}
+
+QPushButton:hover {
+    background-color: #45a049; 
+    border: 1px solid #45a049; 
+}</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_4">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>20</y>
+      <width>160</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QLabel" name="id_label">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(193, 193, 193);
+border-radius: 10px;</string>
+       </property>
+       <property name="text">
+        <string>ID:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="status_label">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(193, 193, 193);
+border-radius: 10px;</string>
+       </property>
+       <property name="text">
+        <string> Status: Offline</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

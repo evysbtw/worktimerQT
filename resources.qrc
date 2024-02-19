@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>journalicon.jpg</file>
+        <file>logouticon.jpg</file>
+        <file>finishicon.jpg</file>
+        <file>pauseicon.jpg</file>
+        <file>starticon.jpg</file>
+        <file>unpauseicon.jpg</file>
+    </qresource>
+</RCC>
