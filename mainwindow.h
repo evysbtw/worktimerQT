@@ -25,7 +25,7 @@ private:
     bool loginCompleted;
     QTime startedTime;
     QTime pausedTime;
-    int requiredTime = 28800;
+    int requiredTime = 800;
     QTimer *timer;
 
 private slots:
