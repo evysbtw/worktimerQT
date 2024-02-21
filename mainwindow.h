@@ -3,8 +3,9 @@
 #include <string>
 #include <QMainWindow>
 #include "databasetools.h"
+#include "infopage.h"
 #include "loginpage.h"
-
+#include <QStackedWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,18 +16,20 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QStackedWidget *stackedWidget, QWidget *parent = nullptr);
     ~MainWindow();
 private:
     Ui::MainWindow *ui;
     QString working_status;
     DatabaseTools dbTools;
     LoginPage *loginPage;
+    infopage *infoPage;
     bool loginCompleted;
     QTime startedTime;
     QTime pausedTime;
-    int requiredTime = 800;
+    int requiredTime = 28800;
     QTimer *timer;
+    QStackedWidget *stackedWidget;
 
 private slots:
     void start_session();

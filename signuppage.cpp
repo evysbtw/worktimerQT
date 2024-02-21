@@ -4,8 +4,9 @@
 #include <QtSql>
 #include <QDebug>
 #include <QSettings>
+#include "QStackedWidget"
 
-signuppage::signuppage(QWidget *parent) :
+signuppage::signuppage(QStackedWidget *stackedWidget, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::signuppage)
 {

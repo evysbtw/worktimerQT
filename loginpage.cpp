@@ -2,15 +2,16 @@
 #include "ui_loginpage.h"
 #include "databasetools.h"
 #include "signuppage.h"
+#include "QStackedWidget"
 
 
-LoginPage::LoginPage(QWidget *parent) :
+LoginPage::LoginPage(QStackedWidget *stackedWidget, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::LoginPage)
 {
     ui->setupUi(this);
 
-    signupPage = new signuppage(this);
+    signupPage = new signuppage(stackedWidget, this);
     connect(ui->loginButton, SIGNAL(clicked()), this, SLOT(logging_in()));
     connect(ui->signup_button, SIGNAL(clicked()), this, SLOT(to_signup_page()));
     connect(signupPage, &signuppage::signupSuccessful, this, &LoginPage::loginSubmitted);

@@ -11,16 +11,21 @@
 #include <QSettings>
 #include <QRegularExpression>
 
+
 using namespace std;
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QStackedWidget *stackedWidget, QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow),
+    stackedWidget(stackedWidget)
 {
-    QWidget *centralWidget = new QWidget;
-    setCentralWidget(centralWidget);
     ui->setupUi(this);
-    loginPage = new LoginPage;
+
+    setFixedSize(800, 600);
+
+    loginPage = new LoginPage(stackedWidget);
+    stackedWidget->addWidget(loginPage);
+
     connect(ui->start_button, SIGNAL(clicked()), this, SLOT(start_session()));
     connect(ui->end_button, SIGNAL(clicked()), this, SLOT(end_session()));
     connect(ui->pause_button, SIGNAL(clicked()), this, SLOT(paused_session()));
@@ -70,8 +75,7 @@ void MainWindow::showEvent(QShowEvent *event) {
     if (email.isEmpty() && !loginCompleted) {
         qDebug() << "Hiding Main window...";
         QTimer::singleShot(0, this, [this](){
-            this->hide();
-            loginPage->show();
+            stackedWidget->setCurrentIndex(1);
         });
     }
 }

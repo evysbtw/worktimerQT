@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "signuppage.h"
+#include "QStackedWidget"
 
 namespace Ui {
 class LoginPage;
@@ -13,7 +14,7 @@ class LoginPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit LoginPage(QWidget *parent = nullptr);
+    explicit LoginPage(QStackedWidget *stackedWidget, QWidget *parent = nullptr);
     ~LoginPage();
 
 private:

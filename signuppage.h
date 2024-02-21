@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "databasetools.h"
+#include "QStackedWidget"
 namespace Ui {
 class signuppage;
 }
@@ -12,7 +13,7 @@ class signuppage : public QDialog
     Q_OBJECT
 
 public:
-    explicit signuppage(QWidget *parent = nullptr);
+    explicit signuppage(QStackedWidget *stackedWidget, QWidget *parent = nullptr);
     ~signuppage();
 
 signals:
