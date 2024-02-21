@@ -8,9 +8,10 @@
 #include <QSqlQueryModel>
 #include <QTableView>
 #include "worktimerquerymodel.h"
+#include "QStackedWidget"
 
 
-infopage::infopage(QWidget *parent) :
+infopage::infopage(QStackedWidget *stackedWidget, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::infopage),
     queryModel(new WorkTimerQueryModel(this))

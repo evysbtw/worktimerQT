@@ -74,9 +74,7 @@ void MainWindow::showEvent(QShowEvent *event) {
 
     if (email.isEmpty() && !loginCompleted) {
         qDebug() << "Hiding Main window...";
-        QTimer::singleShot(0, this, [this](){
-            stackedWidget->setCurrentIndex(1);
-        });
+        stackedWidget->setCurrentWidget(loginPage);
     }
 }
 
@@ -93,7 +91,7 @@ void MainWindow::start_session() {
     QSettings loginSettings("Worktimer");
     QString email = loginSettings.value("email").toString();
     dbTools.createUserTableIfNotExists(email);
-    dbTools.setStart(qDate, qTime, email, "Working", requiredTime);
+    dbTools.setStart(&qDate, &qTime, &email, "Working", &requiredTime);
     qDebug() << requiredTime;
 
     ui->start_button->setEnabled(false);
@@ -116,7 +114,7 @@ void MainWindow::end_session() {
     QString email = loginSettings.value("email").toString();
     QTime id = this->startedTime;
 
-    dbTools.setStop(qDate, qTime, email, id);
+    dbTools.setStop(&qDate, &qTime, &email, &id);
 
     ui->start_button->setEnabled(true);
     ui->end_button->setEnabled(false);
@@ -125,11 +123,11 @@ void MainWindow::end_session() {
 
     ui->status_label->setText("Status: Offline");
 
-    int duration = dbTools.calculateDuration(email, id);
-    int balance = dbTools.calculateBalance(email, duration, requiredTime, qDate);
-    int totalBalance = dbTools.calculateTotalBalance(email, id, balance, qDate, duration, "Working");
+    int duration = dbTools.calculateDuration(&email, &id);
+    int balance = dbTools.calculateBalance(&email, &duration, &requiredTime, &qDate);
+    int totalBalance = dbTools.calculateTotalBalance(&email, &id, &balance, &qDate, &duration, "Working");
 
-    dbTools.setDurationBalanceTotal(duration, balance, totalBalance, email, id);
+    dbTools.setDurationBalanceTotal(&duration, &balance, &totalBalance, &email, &id);
 
 }
 
@@ -144,21 +142,25 @@ void MainWindow::paused_session() {
     this->pausedTime = qTime;
     QSettings loginSettings("Worktimer");
     QString email = loginSettings.value("email").toString();
-    dbTools.setStop(qDate, qTime, email, this->startedTime);
+    QTime id = this->startedTime;
+    dbTools.setStop(&qDate, &qTime, &email, &id);
+
 
     ui->status_label->setText("Status: Paused");
-    int duration = dbTools.calculateDuration(email, this->startedTime);
-    int balance = dbTools.calculateBalance(email, duration, requiredTime, qDate);
-    int totalBalance = dbTools.calculateTotalBalance(email, this->startedTime, balance, qDate, duration, "Working");
+    int duration = dbTools.calculateDuration(&email, &startedTime);
+    int balance = dbTools.calculateBalance(&email, &duration, &requiredTime, &qDate);
+    int totalBalance = dbTools.calculateTotalBalance(&email, &startedTime, &balance, &qDate, &duration, "Working");
 
-    dbTools.setDurationBalanceTotal(duration, balance, totalBalance, email, this->startedTime);
+    dbTools.setDurationBalanceTotal(&duration, &balance, &totalBalance, &email, &startedTime);
 
     ui->start_button->setEnabled(false);
     ui->end_button->setEnabled(false);
     ui->pause_button->setEnabled(false);
     ui->unpause_button->setEnabled(true);
 
-    dbTools.setStart(qDate, qTime, email, "Pause", 0);
+    int pauseTime = 0;
+
+    dbTools.setStart(&qDate, &qTime, &email, "Pause", &pauseTime);
 }
 
 void MainWindow::unpaused_session(const QString& mode) {
@@ -172,17 +174,19 @@ void MainWindow::unpaused_session(const QString& mode) {
     QSettings loginSettings("Worktimer");
     QString email = loginSettings.value("email").toString();
 
-    dbTools.setStop(qDate, qTime, email, this->pausedTime);
+    QTime id = this->pausedTime;
+
+    dbTools.setStop(&qDate, &qTime, &email, &id);
 
     this->startedTime = qTime;
 
     ui->status_label->setText("Status: Active");
 
-    int duration = dbTools.calculateDuration(email, this->pausedTime);
+    int duration = dbTools.calculateDuration(&email, &pausedTime);
     int balance = 0;
-    int totalBalance = dbTools.calculateTotalBalance(email, this->pausedTime, balance, qDate, duration, "Pause");
+    int totalBalance = dbTools.calculateTotalBalance(&email, &pausedTime, &balance, &qDate, &duration, "Pause");
 
-    dbTools.setDurationBalanceTotal(duration, balance, totalBalance, email, this->pausedTime);
+    dbTools.setDurationBalanceTotal(&duration, &balance, &totalBalance, &email, &pausedTime);
 
     ui->start_button->setEnabled(false);
     ui->end_button->setEnabled(true);
@@ -190,17 +194,17 @@ void MainWindow::unpaused_session(const QString& mode) {
     ui->unpause_button->setEnabled(false);
 
     if (mode == "Default") {
-        dbTools.setStart(qDate, qTime, email, "Working", requiredTime);
+        dbTools.setStart(&qDate, &qTime, &email, "Working", &requiredTime);
     }
 }
 
 void MainWindow::show_infopage() {
-    infopage *infoPage = new infopage;
-    infoPage->show();
-    this->hide();
+    infoPage = new infopage(stackedWidget);
+    stackedWidget->addWidget(infoPage);
+    stackedWidget->setCurrentWidget(infoPage);
 
     connect(infoPage, &infopage::goBackSignal, this, [=]() {
-        this->show();
+        stackedWidget->setCurrentWidget(this);
     });
 }
 
@@ -213,15 +217,14 @@ QSqlDatabase& DatabaseTools::database () {
     return db;
 }
 
-
 void MainWindow::loginSuccesful() {
     loginCompleted = true;
     this->show();
 }
 
-void DatabaseTools::setStart(QDate date, QTime time, QString email, QString status, int requiredTime) {
+void DatabaseTools::setStart(QDate *date, QTime *time, QString *email, QString status, int *requiredTime) {
     QSqlDatabase db = DatabaseTools::database();
-    QString sanitizedEmail = sanitizeString(email);
+    QString sanitizedEmail = sanitizeString(*email);
     if (db.open()) {
         qDebug() << "setStart: Connected to the database";
         QSqlQuery query;
@@ -230,10 +233,10 @@ void DatabaseTools::setStart(QDate date, QTime time, QString email, QString stat
         insertQuery = QString("INSERT INTO `%1` (date, start_time, status, required_time) VALUES (:date, :time, :status, :requiredTime)").arg(sanitizedEmail);
 
         query.prepare(insertQuery);
-        query.bindValue(":date", date.toString(Qt::ISODate));
-        query.bindValue(":time", time.toString("HH:mm:ss"));
+        query.bindValue(":date", date->toString(Qt::ISODate));
+        query.bindValue(":time", time->toString("HH:mm:ss"));
         query.bindValue(":status", status);
-        query.bindValue(":requiredTime", requiredTime);
+        query.bindValue(":requiredTime", *requiredTime);
 
         if (query.exec()) {
             qDebug() << "StartTime inserted successfully";
@@ -246,9 +249,9 @@ void DatabaseTools::setStart(QDate date, QTime time, QString email, QString stat
     }
 }
 
-void DatabaseTools::setStop(QDate date, QTime time, QString email, QTime id) {
+void DatabaseTools::setStop(QDate *date, QTime *time, QString *email, QTime *id) {
     QSqlDatabase db = DatabaseTools::database();
-    QString sanitizedEmail = sanitizeString(email);
+    QString sanitizedEmail = sanitizeString(*email);
     if (db.open()) {
         qDebug() << "setStop: Connected to the database";
         QSqlQuery query;
@@ -257,8 +260,8 @@ void DatabaseTools::setStop(QDate date, QTime time, QString email, QTime id) {
         insertQuery = QString("UPDATE `%1` SET end_time = :time WHERE start_time = :starttime").arg(sanitizedEmail);
 
         query.prepare(insertQuery);
-        query.bindValue(":time", time.toString("HH:mm:ss"));
-        query.bindValue(":starttime", id);
+        query.bindValue(":time", time->toString("HH:mm:ss"));
+        query.bindValue(":starttime", *id);
 
         if (query.exec()) {
             qDebug() << "endTime inserted successfully";
@@ -271,7 +274,6 @@ void DatabaseTools::setStop(QDate date, QTime time, QString email, QTime id) {
     }
 }
 
-
 std::string MainWindow::get_time() {
     std::time_t currentTime = std::time(nullptr);
 
@@ -283,7 +285,6 @@ std::string MainWindow::get_time() {
 
     return buffer;
 }
-
 
 void MainWindow::logOut() {
     QSettings loginSettings("Worktimer");
@@ -300,19 +301,15 @@ void MainWindow::logOut() {
     QString email = loginSettings.value("email").toString();
     if (email.isEmpty() && !loginCompleted) {
         qDebug() << "Hiding Main window...";
-        QTimer::singleShot(0, this, [this](){
-            this->hide();
-            loginPage->show();
-        });
+        stackedWidget->setCurrentWidget(loginPage);
     }
     QSqlDatabase db = DatabaseTools::database();
     db.close();
 
 }
 
-
-int DatabaseTools::calculateDuration(QString email, QTime startTime) {
-    QString sanitizedEmail = sanitizeString(email);
+int DatabaseTools::calculateDuration(QString *email, QTime *startTime) {
+    QString sanitizedEmail = sanitizeString(*email);
 
     QSqlDatabase db = DatabaseTools::database();
     if (db.open()) {
@@ -321,13 +318,13 @@ int DatabaseTools::calculateDuration(QString email, QTime startTime) {
 
         QString insertQuery = QString("SELECT end_time FROM `%1` WHERE start_time = :startTime").arg(sanitizedEmail);
         query.prepare(insertQuery);
-        query.bindValue(":startTime", startTime);
+        query.bindValue(":startTime", *startTime);
 
 
         if (query.exec()) {
             if (query.next()) {
                 QTime endTime = query.value(0).toTime();
-                int duration = startTime.secsTo(endTime);
+                int duration = startTime->secsTo(endTime);
                 return duration;
             }
         }
@@ -344,15 +341,15 @@ int DatabaseTools::calculateDuration(QString email, QTime startTime) {
     return 0;
 }
 
-int DatabaseTools::calculateBalance(QString email, int duration, int requiredTime, QDate date) {
+int DatabaseTools::calculateBalance(QString *email, int *duration, int *requiredTime, QDate *date) {
     QSqlDatabase db = DatabaseTools::database();
-    QString sanitizedEmail = sanitizeString(email);
+    QString sanitizedEmail = sanitizeString(*email);
     if (db.open()) {
         QSqlQuery query;
 
         QString idQuery = QString("SELECT id FROM `%1` WHERE date = :date AND status = :status ORDER BY id DESC").arg(sanitizedEmail);
         query.prepare(idQuery);
-        query.bindValue(":date", date);
+        query.bindValue(":date", *date);
         query.bindValue(":status", "Working");
 
         qDebug() << "Db opened, calculating balance..";
@@ -373,7 +370,7 @@ int DatabaseTools::calculateBalance(QString email, int duration, int requiredTim
                     if (query.next()) {
                         int balance = query.value(0).toInt();
                         qDebug() << "Todays balance: " << balance;
-                        int newbalance = balance + duration;
+                        int newbalance = balance + *duration;
                         qDebug() << "New balance: " << newbalance;
                         return newbalance;
                     }
@@ -381,7 +378,7 @@ int DatabaseTools::calculateBalance(QString email, int duration, int requiredTim
             }
             else {
                 qDebug() << "Query size = 1, updating balance..";
-                int balance = duration - requiredTime;
+                int balance = *duration - *requiredTime;
                 return balance;
             }
         }
@@ -392,8 +389,8 @@ int DatabaseTools::calculateBalance(QString email, int duration, int requiredTim
     return 0;
 }
 
-int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int balance, QDate date, int duration, QString status) {
-    QString sanitizedEmail = sanitizeString(email);
+int DatabaseTools::calculateTotalBalance(QString *email, QTime *startTime, int *balance, QDate *date, int *duration, QString status) {
+    QString sanitizedEmail = sanitizeString(*email);
 
     QSqlDatabase db = DatabaseTools::database();
     QSqlQuery query;
@@ -402,7 +399,7 @@ int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int bal
 
         QString idQuery = QString("SELECT id FROM `%1` WHERE date = :date ORDER BY id DESC").arg(sanitizedEmail);
         query.prepare(idQuery);
-        query.bindValue(":date", date);
+        query.bindValue(":date", *date);
 
 
         if (query.exec()) {
@@ -421,7 +418,7 @@ int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int bal
                     if (query.next()) {
                         int previousTotalBalance = query.value(0).toInt();
                         if (status == "Working") {
-                            int actualTotalBalance = previousTotalBalance + duration;
+                            int actualTotalBalance = previousTotalBalance + *duration;
                             return actualTotalBalance;
                         }
                         else {
@@ -445,13 +442,13 @@ int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int bal
                         if (query.exec()) {
                             if (query.next()) {
                                 int previousTotalBalance = query.value(0).toInt();
-                                int totalBalance = previousTotalBalance + balance;
+                                int totalBalance = previousTotalBalance + *balance;
                                 return totalBalance;
                             }
                         }
                     }
                     else {
-                        return balance;
+                        return *balance;
                     }
                 }
             }
@@ -459,9 +456,9 @@ int DatabaseTools::calculateTotalBalance(QString email, QTime startTime, int bal
     }
 }
 
-void DatabaseTools::setDurationBalanceTotal(int duration, int balance, int totalBalance, QString email, QTime startTime) {
+void DatabaseTools::setDurationBalanceTotal(int *duration, int *balance, int *totalBalance, QString *email, QTime *startTime) {
     QSqlDatabase db = DatabaseTools::database();
-    QString sanitizedEmail = sanitizeString(email);
+    QString sanitizedEmail = sanitizeString(*email);
 
     if (db.open()) {
         qDebug() << "setDurationTotalBalance: Connected to the database";
@@ -471,10 +468,10 @@ void DatabaseTools::setDurationBalanceTotal(int duration, int balance, int total
         insertQuery = QString("UPDATE `%1` SET duration = :duration, balance = :balance, total_balance = :total_balance WHERE start_time = :start_time").arg(sanitizedEmail);
 
         query.prepare(insertQuery);
-        query.bindValue(":duration", duration);
-        query.bindValue(":balance", balance);
-        query.bindValue(":total_balance", totalBalance);
-        query.bindValue(":start_time", startTime);
+        query.bindValue(":duration", *duration);
+        query.bindValue(":balance", *balance);
+        query.bindValue(":total_balance", *totalBalance);
+        query.bindValue(":start_time", *startTime);
 
         if (query.exec()) {
             qDebug() << "Data inserted successfully";

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QtSql>
+#include "QStackedWidget"
 
 namespace Ui {
 class infopage;
@@ -13,7 +14,7 @@ class infopage : public QWidget
     Q_OBJECT
 
 public:
-    explicit infopage(QWidget *parent = nullptr);
+    explicit infopage(QStackedWidget *stackedWidget, QWidget *parent = nullptr);
     ~infopage();
 
 private:

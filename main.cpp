@@ -10,8 +10,6 @@ int main(int argc, char *argv[])
     // Create the main window and pass the QStackedWidget to it
     MainWindow mainWindow(&stackedWidget);
 
-    // Create the login page and pass the QStackedWidget to it
-
     // Add widgets to the QStackedWidget
     stackedWidget.addWidget(&mainWindow);
 
